@@ -12,6 +12,7 @@ classdef geometricModel < handle
         iTj_0
         jointType
         jointNumber
+        jointAxis
         iTj
         q
         eTt  % transformation end-effector tool. Added to be coherent with main call of geometricModel
@@ -19,12 +20,13 @@ classdef geometricModel < handle
 
     methods
         % Constructor to initialize the geomModel property
-        function self = geometricModel(iTj_0,jointType, eTt)
+        function self = geometricModel(iTj_0,jointType,jointAxis,eTt)
             if nargin > 1
                 self.iTj_0 = iTj_0;
                 self.iTj = iTj_0;
                 self.jointType = jointType;
                 self.jointNumber = length(jointType);
+                self.jointAxis = jointAxis;
                 self.q = zeros(self.jointNumber,1);
                 self.eTt = eTt; % added inizialization 
             else 
@@ -48,16 +50,41 @@ classdef geometricModel < handle
                 T_current = eye(4);
                 % Revolut joint
                 if (self.jointType(t) == 0)
-                    R_z = [cos(self.q(t)),-sin(self.q(t)),0;
-                           sin(self.q(t)),cos(self.q(t)),0;
-                            0,0,1];
-                    T_current(1:3,1:3) = R_z;
+                    switch self.jointAxis(t)
+                        case 1  % rotation about x
+                            R = [1,  0,                0;
+                                 0,  cos(self.q(t)), -sin(self.q(t));
+                                 0,  sin(self.q(t)),  cos(self.q(t))];
+                        
+                        case 2  % rotation about y
+                            R = [ cos(self.q(t)),  0,  sin(self.q(t));
+                                  0,                1,  0;
+                                 -sin(self.q(t)),  0,  cos(self.q(t))];
+                        
+                        case 3  % rotation about z
+                            R = [cos(self.q(t)), -sin(self.q(t)),  0;
+                                 sin(self.q(t)),  cos(self.q(t)),  0;
+                                 0,               0,               1];
+                        otherwise
+                            error(['Invalid axes ' num2str(t)]);
+                    end
+                    T_current(1:3,1:3) = R;
                 end
     
                 % Prismatic joint
                 if (self.jointType(t) == 1)
-                    T_current(3,4) = self.q(t); 
+                    switch self.jointAxis(t)
+                        case 1
+                            T_current(1,4) = self.q(t);  % translation along x
+                        case 2
+                            T_current(2,4) = self.q(t);  % translation along y
+                        case 3
+                            T_current(3,4) = self.q(t);  % translation along z
+                        otherwise
+                            error(['Invalid axes ' num2str(t)]);
+                    end 
                 end
+
                 % Invalid joint
                 if (self.jointType(t) ~= 0 &&  self.jointType(t) ~= 1)
                     error("Invalid joint");

@@ -46,7 +46,15 @@ classdef kinematicModel < handle
 
                 end
                     p_prev = T_prev(1:3,4); % (needed to compute position vector)
-                    z_prev = T_prev(1:3,3);% (needed to compute linear velocity direction in revolut joints)
+                    % (needed to compute linear velocity direction in revolut joints)
+                    switch self.gm.jointAxis(j)
+                        case 1  % x axes
+                            z_prev = T_prev(1:3,1);  % first column of R
+                        case 2  % y
+                            z_prev = T_prev(1:3,2);  
+                        case 3  % z
+                            z_prev = T_prev(1:3,3);  
+                    end
 
                 if self.gm.jointType(j) == 0 % Revolut joint
                         Jb_i_A(:, j) = z_prev; % Direction of rotation axis

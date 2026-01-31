@@ -10,6 +10,7 @@ iTj_0 = BuildTree();
 disp('iTj_0')
 disp(iTj_0);
 jointType = [0 0 0 0 0 1 0]; % specify two possible link type: Rotational, Prismatic.
+jointAxis = [3 3 3 3 3 3 3]; % specificy the reference axis 1=x 2=y 3=z
 q = [pi/2, -pi/4, 0, -pi/4, 0, 0.15, pi/4]';
 
 %% Define the tool frame rigidly attached to the end-effector
@@ -23,7 +24,7 @@ eTt = [eRt, e_r_te;  0 0 0 1];
 %% Initialize Geometric Model (GM) and Kinematic Model (KM)
 
 % Initialize geometric model with q0
-gm = geometricModel(iTj_0,jointType,eTt);
+gm = geometricModel(iTj_0,jointType,jointAxis,eTt);
 
 % Update direct geoemtry given q0
 gm.updateDirectGeometry(q);

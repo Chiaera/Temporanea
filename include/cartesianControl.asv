@@ -50,27 +50,16 @@ classdef cartesianControl < handle
 
             % ANGULAR con YPR
             % actual YPR of tool
-            [psi_t, theta_t, phi_t] = RotToYPR(current_tool_orientation);
+            [psi_t, theta_t, phi_t] = RotToYPR(bRt);
 
             %desider YPR goal
-            psi_g = 0;
-            theta_g = 0;
-            phi_g = 0;
+            [psi_g, theta_g, phi_g] = [0,0,0];
 
             %YPR error
             error_eta = [psi_g - psi_t;
-                         theta_g - theta_t;
-                         phi_g - phi_t];
-            
-            % YPR -> omega
-            T = [ 1, 0, -sin(theta_t); 
-                0, cos(phi_t), cos(theta_t)*sin(phi_t); 
-                 0, -sin(phi_t), cos(theta_t)*cos(phi_t)];
+                         theta_g ]
 
-            % desider angular velocity
-            omega = T * (self.k_a * error_eta);
 
-            x_dot = [omega; v_c];
 
         end
     end
